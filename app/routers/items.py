@@ -63,6 +63,8 @@ def remove_item_from_slot(
             _slot_404()
         if str(e) == "item_not_found":
             _item_404()
+        if str(e) == "insufficient_quantity":
+            raise HTTPException(status_code=400, detail="Insufficient item quantity in slot")
         raise
 
 

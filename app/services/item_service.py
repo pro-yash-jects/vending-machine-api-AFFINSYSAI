@@ -7,7 +7,7 @@ from app.schemas import ItemBulkEntry, ItemCreate
 
 
 def add_item_to_slot(db: Session, slot_id: str, data: ItemCreate) -> Item:
-    with db.being():
+    with db.begin():
         slot = db.query(Slot).filter(Slot.id == slot_id).first()
         if not slot:
             raise ValueError("slot_not_found")
@@ -74,7 +74,9 @@ def remove_item_quantity(
     if not item:
         raise ValueError("item_not_found")
     if quantity is not None:
-        to_remove = min(quantity, item.quantity)
+        if quantity > item.quantity:
+            raise ValueError("insufficient_quantity")
+        to_remove = quantity
         item.quantity -= to_remove
         slot.current_item_count -= to_remove
         if item.quantity <= 0:
