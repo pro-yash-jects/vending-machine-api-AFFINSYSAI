@@ -80,6 +80,7 @@ class PurchaseResponse(BaseModel):
     price: int
     cash_inserted: int
     change_returned: int
+    change_breakdown: dict[str, int]
     remaining_quantity: int
     message: str
 
