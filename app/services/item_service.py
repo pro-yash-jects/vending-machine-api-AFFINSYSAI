@@ -7,27 +7,25 @@ from app.schemas import ItemBulkEntry, ItemCreate
 
 
 def add_item_to_slot(db: Session, slot_id: str, data: ItemCreate) -> Item:
-    slot = db.query(Slot).filter(Slot.id == slot_id).first()
-    if not slot:
-        raise ValueError("slot_not_found")
-    if slot.current_item_count + data.quantity > slot.capacity:
-        raise ValueError("capacity_exceeded")
-    
-    if slot.current_item_count + data.quantity < settings.MAX_ITEMS_PER_SLOT:
-        raise ValueError("capacity_exceeded")
-    #this check is flawed because it checks for the total item count to be less than the max and still raises capacity_exceeded,
-    item = Item(
-        name=data.name,
-        price=data.price,
-        slot_id=slot_id,
-        quantity=data.quantity,
-    )
-    db.add(item)
-    slot.current_item_count += data.quantity
-    db.commit()
+    with db.being():
+        slot = db.query(Slot).filter(Slot.id == slot_id).first()
+        if not slot:
+            raise ValueError("slot_not_found")
+        if slot.current_item_count + data.quantity > slot.capacity:
+            raise ValueError("capacity_exceeded")
+        # if slot.current_item_count + data.quantity < settings.MAX_ITEMS_PER_SLOT:
+        #     raise ValueError("capacity_exceeded")
+        item = Item(
+            name=data.name,
+            price=data.price,
+            slot_id=slot_id,
+            quantity=data.quantity,
+        )
+        db.add(item)
+        slot.current_item_count += data.quantity
     db.refresh(item)
     return item
-
+##fixed : flawed logic of checking the total itemcount to be less than max items per slot. Also added db.being() context to ensure atomicity of the operation.
 
 def bulk_add_items(db: Session, slot_id: str, entries: list[ItemBulkEntry]) -> int:
     slot = db.query(Slot).filter(Slot.id == slot_id).first()
