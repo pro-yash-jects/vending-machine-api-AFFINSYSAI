@@ -87,6 +87,8 @@ def add_item_to_slot(slot_id: str, data: ItemCreate, db: Session = Depends(get_d
                 status_code=400,
                 detail="Total items would exceed slot capacity",
             )
+        if str(e) == "invalid_price":
+            raise HTTPException(status_code=400, detail="Price must greater than 0")
         raise
 
 
@@ -103,6 +105,8 @@ def bulk_add_items(slot_id: str, body: ItemBulkRequest, db: Session = Depends(ge
                 status_code=400,
                 detail="Total items would exceed slot capacity",
             )
+        if str(e) == "invalid_price":
+            raise HTTPException(status_code=400, detail="Price must greater than 0")
         raise
 
 

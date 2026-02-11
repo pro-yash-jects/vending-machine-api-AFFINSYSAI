@@ -15,6 +15,8 @@ def add_item_to_slot(db: Session, slot_id: str, data: ItemCreate) -> Item:
             raise ValueError("capacity_exceeded")
         # if slot.current_item_count + data.quantity < settings.MAX_ITEMS_PER_SLOT:
         #     raise ValueError("capacity_exceeded")
+        if data.price <=0:
+            raise ValueError("invalid_price")
         item = Item(
             name=data.name,
             price=data.price,
@@ -35,6 +37,8 @@ def bulk_add_items(db: Session, slot_id: str, entries: list[ItemBulkEntry]) -> i
     for e in entries:
         if e.quantity <= 0:
             continue
+        if e.price <=0:
+            raise ValueError("invalid_price")
         item = Item(name=e.name, price=e.price, slot_id=slot_id, quantity=e.quantity)
         db.add(item)
         added += 1
